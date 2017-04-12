@@ -160,7 +160,7 @@ openresty_force_recompile = node.run_state['openresty_force_recompile']
 
 ruby_block 'persist-openresty-configure-flags' do
   block do
-    if Chef::Config[:solo]
+    if Chef::Config[:solo] or node['openresty']['force_solo_behavior']
       ::File.write(::File.join(::File.dirname(src_filepath), 'openresty.configure-opts'), configure_flags.sort.uniq.join("\n"))
     else
       node.set['openresty']['persisted_configure_flags'] = configure_flags.sort.uniq
@@ -181,7 +181,7 @@ bash 'compile_openresty_source' do
   EOH
 
   # OpenResty configure args massaging due to the configure script adding its own arguments along our custom ones
-  if Chef::Config[:solo]
+  if Chef::Config[:solo] or node['openresty']['force_solo_behavior']
     not_if do
       openresty_force_recompile == false &&
         node.automatic_attrs['nginx'] &&
